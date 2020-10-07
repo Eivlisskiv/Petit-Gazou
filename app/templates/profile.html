@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <tr valing="top">
+        <td><img src="{{ user.avatar }}"/></td>
+        <td><h1>Utilisateur: {{ user.nom }} </h1></td>
+        {% if user.about %} <p>{{user.about}}</p>{% endif %}
+        {% if user.lastonline %}<p> Dernièrement en ligne: {{user.lastonline}}</p>{% endif %}
+
+        <p>Partisan de {{ user.partisans.count() }} utilisateur(s)<br/>
+        Suivit par {{ user.tbpartisans.count() }} utilisateur(s)</p>
+    </tr>
+    <tr>
+        {% if user == current_user %}
+        <p> <a href="{{ url_for('editprofile') }}">Modifier votre profil</a></p>
+        {% else %}
+            {% if not current_user.isPartisan(user) %}
+            <a href="{{ url_for('suivre', nom=user.nom) }}"><button>Abonner</button></a>
+            {% else %}
+            <a href="{{ url_for('suivre', nom=user.nom) }}"><button>Désabonner</button></a>
+            {% endif %}
+        
+        {% endif %}
+    </tr>
+</table>
+<hr>
+<table>
+    {% for pub in pubs %}
+        {% include '_publication.html' %}
+    {% endfor %}
+</table>
+{% endblock %}

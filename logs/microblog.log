@@ -1,0 +1,73 @@
+2020-10-05 15:32:53,762 ERROR: Exception on / [GET] [in /home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py:1892]
+Traceback (most recent call last):
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 1945, in full_dispatch_request
+    self.try_trigger_before_first_request_functions()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 1993, in try_trigger_before_first_request_functions
+    func()
+  File "/home/etudiant/python/petits_gazou/petits_gazou.py", line 29, in initialization
+    element = modeles.get_modele(table, ligne, racine)
+  File "/home/etudiant/python/petits_gazou/app/modeles.py", line 91, in get_modele
+    u=Utilisateur(nom=nom, email=ligne[1].strip(), avatar=avatar, about=ligne[3].strip(), lastonline=datetime.utcnow())
+  File "<string>", line 2, in __init__
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/instrumentation.py", line 388, in _new_state_if_none
+    state = self._state_constructor(instance, self)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/util/langhelpers.py", line 883, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/instrumentation.py", line 214, in _state_constructor
+    self.dispatch.first_init(self, self.class_)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/event/attr.py", line 322, in __call__
+    fn(*args, **kw)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/mapper.py", line 3413, in _event_on_first_init
+    configure_mappers()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/mapper.py", line 3301, in configure_mappers
+    mapper._post_configure_properties()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/mapper.py", line 1966, in _post_configure_properties
+    prop.init()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/interfaces.py", line 197, in init
+    self.do_init()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/relationships.py", line 2080, in do_init
+    self._generate_backref()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/relationships.py", line 2333, in _generate_backref
+    % (backref_key, self, m)
+sqlalchemy.exc.ArgumentError: Error creating backref 'partisans' on relationship 'Utilisateur.partisans': property of that name exists on mapper 'mapped class Utilisateur->utilisateur'
+2020-10-05 15:33:02,606 ERROR: Exception on /login [GET] [in /home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py:1892]
+Traceback (most recent call last):
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 1945, in full_dispatch_request
+    self.try_trigger_before_first_request_functions()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/flask/app.py", line 1993, in try_trigger_before_first_request_functions
+    func()
+  File "/home/etudiant/python/petits_gazou/petits_gazou.py", line 29, in initialization
+    element = modeles.get_modele(table, ligne, racine)
+  File "/home/etudiant/python/petits_gazou/app/modeles.py", line 91, in get_modele
+    u=Utilisateur(nom=nom, email=ligne[1].strip(), avatar=avatar, about=ligne[3].strip(), lastonline=datetime.utcnow())
+  File "<string>", line 2, in __init__
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/instrumentation.py", line 388, in _new_state_if_none
+    state = self._state_constructor(instance, self)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/util/langhelpers.py", line 883, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/instrumentation.py", line 214, in _state_constructor
+    self.dispatch.first_init(self, self.class_)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/event/attr.py", line 322, in __call__
+    fn(*args, **kw)
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/mapper.py", line 3413, in _event_on_first_init
+    configure_mappers()
+  File "/home/etudiant/python/petits_gazou/venv/lib/python3.7/site-packages/sqlalchemy/orm/mapper.py", line 3297, in configure_mappers
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'mapped class Utilisateur->utilisateur'. Original exception was: Error creating backref 'partisans' on relationship 'Utilisateur.partisans': property of that name exists on mapper 'mapped class Utilisateur->utilisateur'
+2020-10-05 15:34:08,700 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 15:34:15,159 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 16:58:37,043 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 16:59:36,768 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:01:58,645 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:03:01,272 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:03:17,791 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:05:46,219 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:06:23,083 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:10:41,947 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:12:08,640 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:12:59,920 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-10-05 17:13:33,270 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]

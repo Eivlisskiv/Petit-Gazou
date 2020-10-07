@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Bonjour, {{current_user.nom}}!</h1>
+    
+    <img src="{{current_user.avatar}}"/>
+
+    {% if form %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.publication.label }}<br/>
+            {{ form.publication(col=52, rows=4) }}
+            {% for err in form.publication.errors %}
+            <span style="color:red;" >[{{err}}]</span>
+            {% endfor %}
+        </p>
+        <p>{{form.send()}}</p>
+    </form>
+    {% endif %}
+    
+    {% include '_publications.html' %}
+
+{% endblock %}

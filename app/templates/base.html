@@ -1,0 +1,35 @@
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+<!-- ./../../static/css/styles.css -->
+<html>
+    <head>
+        {% if title %}
+        <title>{{title}} - {{name}}</title>
+        {% else %}
+        <title>Bienvenue - {{name}}</title>
+        {% endif %}
+    </head>
+    <body>
+        <div>{{name}} 
+            <a href="{{url_for('index')}}">Accueil</a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile', nom=current_user.nom) }}">Profil</a>
+            <a href="{{ url_for('explorer')}}">Explorer</a>
+            <a href="{{ url_for('logout')}}">Fin de Session</a>
+            {% else %}
+            <a href="{{url_for('login')}}">Établir Session</a>
+            {% endif %}
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>

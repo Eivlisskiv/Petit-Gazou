@@ -1,0 +1,12 @@
+<table>
+    {% for pub in pubs %}
+        {% include '_publication.html' %}
+    {% endfor %}
+</table>
+<br>
+{% if prev %}
+    <a href="{{ prev }}"><button>Précédent</button></a>
+{% endif %}
+{% if next %}
+    <a href="{{ next }}"><button>Suivant</button></a>
+{% endif %}
