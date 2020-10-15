@@ -104,13 +104,13 @@ def logout():
 @app.route('/profile/<nom>')
 @login_required
 def profile(nom):
-    user = modeles.load_username(nom)
+    user = Utilisateur.load_username(nom)
     return render_template('profile.html', user=user, pubs=user.publications.all())
 
 @app.route('/suivre/<nom>', methods=['GET'])
 @login_required
 def suivre(nom):
-    user = modeles.load_username(nom)
+    user = Utilisateur.load_username(nom)
     if user is None:
         return redirect(url_for('index'))
     if user != current_user:

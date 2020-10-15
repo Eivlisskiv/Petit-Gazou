@@ -17,12 +17,12 @@ class FormRegister(FlaskForm):
     password2 = PasswordField('Retapez Mot de passe', validators=[DataRequired(), EqualTo('password')])
 
     def validate_nom(self, nom):
-        user = app.modeles.load_username(nom=nom.data).first()
+        user = Utilisateur.load_username(nom=nom.data).first()
         if user is not None:
             raise ValidationError('Ce nom existe déjà...')
 
     def validate_email(self, email):
-        user = app.modeles.load_username(email=email.data).first()
+        user = Utilisateur.load_username(email=email.data).first()
         if user is not None:
             raise ValidationError('Ce courriel existe déjà...')
 
@@ -36,7 +36,7 @@ class FormEditProfile(FlaskForm):
         self.nom_original = nom_original
 
     def validate_nom(self, nom):
-        if nom.data != self.nom_original and app.modeles.load_username(nom=self.nom.data).first() is not None:
+        if nom.data != self.nom_original and Utilisateur.load_username(nom=self.nom.data).first() is not None:
                 raise ValidationError('Ce nom existe déjà dans la base de données')
 
 class PublicationForm(FlaskForm):

@@ -1,27 +1,46 @@
+{% extends 'bootstrap/base.html' %}
 
+{% block styles %}
+    {{super()}}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 <!-- ./../../static/css/styles.css -->
-<html>
-    <head>
-        {% if title %}
-        <title>{{title}} - {{name}}</title>
-        {% else %}
-        <title>Bienvenue - {{name}}</title>
-        {% endif %}
-    </head>
-    <body>
-        <div>{{name}} 
-            <a href="{{url_for('index')}}">Accueil</a>
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile', nom=current_user.nom) }}">Profil</a>
-            <a href="{{ url_for('explorer')}}">Explorer</a>
-            <a href="{{ url_for('logout')}}">Fin de Session</a>
-            {% else %}
-            <a href="{{url_for('login')}}">Établir Session</a>
-            {% endif %}
+{% endblock %}
+{% block scripts %}
+    {{super()}}
+    <script src="//dfmjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity=""></script>
+    <script src="../base.js"></script>
+{% endblock %}
+
+{% block title %}
+    {% if title %}
+        {{title}} - Petits Gazous par Maxime Gautier
+    {% else %}
+        Bienvenue sur Petits Gazous par Maxime Gautier
+    {% endif %}
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{url_for('index')}}">Accueil</a>
+                {% if current_user.is_authenticated %}
+                    <a class="navbar-brand" href="{{ url_for('profile', nom=current_user.nom) }}">Profil</a>
+                    <a class="navbar-brand" href="{{ url_for('explorer')}}">Explorer</a>
+                    <a class="navbar-brand"href="{{ url_for('logout')}}">Fin de Session</a>
+                {% else %}
+                    <a class="navbar-brand"href="{{url_for('login')}}">Établir Session</a>
+                {% endif %}
+
+                <!--<a class="navbar-brand"href="{{url_for('index')}}">Websocket</a>-->
+            </div>
         </div>
-        <hr>
-        {% with messages = get_flashed_messages() %}
+    </nav>
+{% endblock %}
+{% block content %}
+<div class="container">
+    Petits Gazous par Maxime Gautier
+    {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul>
             {% for message in messages %}
@@ -29,7 +48,8 @@
             {% endfor %}
         </ul>
         {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
-    </body>
-</html>
+    {% endwith %}
+
+    {% block app_content %}{% endblock %}
+</div>
+{% endblock %}

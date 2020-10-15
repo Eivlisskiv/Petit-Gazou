@@ -3,6 +3,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+
 from datetime import datetime
 
 import logging
@@ -11,6 +12,9 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+from flask_bootstrap import Bootstrap
+bootstrap = Bootstrap(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, render_as_batch=True)
@@ -48,4 +52,9 @@ if not app.debug and app.config['MAIL_SERVER']:
 
     app.config['TRAP_HTTP_EXCEPTIONS']=True
     
+from app.api import bp as api_bp
+app.register_blueprint(api_bp, url_prefix='/api')
+
 from app import routes, modeles, errors
+
+#from app.api import  errors

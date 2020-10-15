@@ -9,15 +9,38 @@ from app import LoginManager
 def load_utilisateur(id):
     return Utilisateur.query.get(int(id))
 
-def load_username(nom):
-    return Utilisateur.query.filter_by(nom=nom).first_or_404()
-
 tbpartisans = db.Table('TBPartisans',
     db.Column('suiveur', db.Integer, db.ForeignKey('utilisateur.id')),
     db.Column('suivit', db.Integer, db.ForeignKey('utilisateur.id'))
 )
 
+class PaginatedAPImixin(obj):
+    @staticmethod
+    def to_collection_dict(requete, page, perp, endpoint, **kwargs):
+        ressources = requete.paginate(page, perp, False)
+        return {
+            'items': [item.to_dict() for item in ressources.items],
+            '_meta':{
+                'page':page,
+                'per_page':perp,
+                'page count':ressources.pages,
+                'item count':ressources.total
+            },
+            '_links':{
+                'self': url_for(endpoint, page=page, per_page=perp, **kwargs),
+                'next': url_for(endpoint, page=page+1, per_page=perp, **kwards)
+                        if ressources.has_next else None,
+                'prev': url_for(endpoint, page=page-1, per_page=perp, **kwards)
+                        if ressources.has_prev else None,
+            }
+        }
+
 class Utilisateur(UserMixin, db.Model):
+    @staticmethod
+    def load_username(nom):
+        return Utilisateur.query.filter_by(nom=nom).first_or_404()
+
+
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -60,6 +83,21 @@ class Utilisateur(UserMixin, db.Model):
 
     def valider_mot_de_passe(self, pwd):
         return check_password_hash(self.password, pwd)
+
+    def to_dict(self):
+        pubs = self.getPartisansPubs()
+        followers = self.partisans
+
+        return {
+            'id': self.id,
+            'nom': self.nom,
+            'email': self.email,
+            'avatar': self.avatar,
+            'about': self.about,
+            'lastseen': self.lastonline,
+            'pubs': [item.id for item in pubs],
+            'followers': [item.id for item in followers]
+        }
 
 class Publication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
