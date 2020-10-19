@@ -14,7 +14,7 @@ tbpartisans = db.Table('TBPartisans',
     db.Column('suivit', db.Integer, db.ForeignKey('utilisateur.id'))
 )
 
-class PaginatedAPImixin(obj):
+class PaginatedAPImixin():
     @staticmethod
     def to_collection_dict(requete, page, perp, endpoint, **kwargs):
         ressources = requete.paginate(page, perp, False)
@@ -47,9 +47,12 @@ class Utilisateur(UserMixin, db.Model):
     password = db.Column(db.String(128))
     avatar = db.Column(db.Text(131072), index=False, unique=False)
     about = db.Column(db.Text(140))
-    publications = db.relationship('Publication', backref='auteur', lazy='dynamic')
-
     lastonline = db.Column(db.DateTime, default=datetime.utcnow())
+
+    jeton = db.Column(db.String(32), index=True, unique=True)
+    jeton_expiration = db.Column(db.DateTime)
+
+    publications = db.relationship('Publication', backref='auteur', lazy='dynamic')
 
     partisans = db.relationship('Utilisateur', secondary=tbpartisans, 
         primaryjoin=(tbpartisans.c.suiveur == id),
@@ -98,6 +101,27 @@ class Utilisateur(UserMixin, db.Model):
             'pubs': [item.id for item in pubs],
             'followers': [item.id for item in followers]
         }
+    
+    def get_jeton(self, expire=3600):
+        now - datetime.utcnow()
+        if not self.jeton or self.jeton_expiration < now + timedelta(seconds=60): 
+            self.jeton = base64.b64encode(os.irandom(24)).decode('utf-8')
+            self.jeton_expiration = now + timedelta(seconds=expire)
+            db.session.add(self)
+        return self.jeton
+    
+    def revoke_jeton(self):
+        self.jeton_expiration = datetime.utcnow() - timedelta(seconds=1)
+
+    @staticmethod
+    def verify_jeton(jeton):
+        user = Utilisateur.query.filter_by(jeton=jeton).first()
+        if not user or not user.jeton or user.jeton_expiration < datetime.utcnow():
+            return None
+        return user
+        
+
+
 
 class Publication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
