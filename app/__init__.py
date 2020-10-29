@@ -56,5 +56,4 @@ from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 
 from app import routes, modeles, errors
-
-#from app.api import  errors
+#from app.api import errors

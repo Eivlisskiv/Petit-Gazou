@@ -121,9 +121,12 @@ class Utilisateur(UserMixin, db.Model):
         return user
         
 
-
-
 class Publication(db.Model):
+
+    @staticmethod
+    def from_id(id):
+        return Publication.query.get_or_404(id).to_dict()
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(128))
     creation = db.Column(db.DateTime, index=True, default=datetime.utcnow)

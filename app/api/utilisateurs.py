@@ -10,7 +10,7 @@ def get_utilisateur(id):
 def get_utilisateurs():
     page = request.args.get('page', 1, type=int)
     perp = min(request.args.get('par_page', 10, type=int), 100)
-    return jsonify(Utilisateur.to_collection_dict(Utilisateur.query, page, perp, 'api.get_publications'))
+    return jsonify(Utilisateur.to_collection_dict(Utilisateur.query, page, perp, 'api.get_utilisateur'))
 
 @bp.route('/utilisateurs', methods=['POST'])
 def create_utilisateurs():
