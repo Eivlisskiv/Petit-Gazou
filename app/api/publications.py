@@ -23,8 +23,12 @@ def get_publications():
 
 @bp.route('/publications/', methods=['POST'])
 def creer_pub():
-    return ''
+    return 'create'
+
+@bp.route('/publications/', methods=['PUT'])
+def put_pub():
+    return 'modify'
 
 @bp.route('/publications/', methods=['DELETE'])
 def delete_pub():
-    return ''
+    return 'delete'

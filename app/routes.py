@@ -1,4 +1,5 @@
-from app import app, db, modeles
+from app import app
+from app import db, modeles, socketio
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app.forms import FormSession, FormRegister, FormEditProfile, PublicationForm
@@ -14,6 +15,11 @@ def before_request():
     if current_user.is_authenticated:
         current_user.lastonline = datetime.utcnow()
         db.session.commit()
+
+@app.route('/websocket')
+def websocket():
+    print('Websocket route')
+    return render_template('websocket.html')
 
 def getPages(list, url):
     return (
@@ -34,6 +40,7 @@ def index():
         pub = Publication(body=form.publication.data, auteur=current_user)
         db.session.add(pub)
         db.session.commit()
+        socketio.emit('nouvelle_publication', { 'id' : pub.id }, namespace='/chat')
         flash('Publication envoyée!')
 
     pubs = current_user.getPartisansPubs().paginate(
@@ -121,6 +128,7 @@ def suivre(nom):
             current_user.userUnsub(user)
             flash('Vous ne suivez plus ' + nom)
         db.session.commit()
+        socketio.emit('actualiser', {'bison':'vide'}, namespace='/chat')
     
     return redirect(url_for('profile', nom=nom))
         

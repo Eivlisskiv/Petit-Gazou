@@ -10,8 +10,12 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
+from flask_socketio import SocketIO
+
 app = Flask(__name__)
 app.config.from_object(Config)
+
+socketio = SocketIO(app)
 
 from flask_bootstrap import Bootstrap
 bootstrap = Bootstrap(app)
