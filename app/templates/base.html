@@ -9,6 +9,13 @@
     {{super()}}
     <script src="//dfmjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity=""></script>
     <script type="text/javascript" src="{{url_for('static', filename='base.js')}}"></script>
+    <script>
+        function afficher_data1(){
+            afficher_data('#utilisateurs', '#publications', 1, 999999)
+            //initialiser_websocket()
+        }
+
+    </script>
 {% endblock %}
 
 {% block title %}

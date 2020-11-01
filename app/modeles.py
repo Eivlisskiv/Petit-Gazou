@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from app import db
-import os
+import os, base64
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from flask import url_for
 from app import LoginManager
 
 @LoginManager.user_loader
@@ -28,14 +29,14 @@ class PaginatedAPImixin():
             },
             '_links':{
                 'self': url_for(endpoint, page=page, per_page=perp, **kwargs),
-                'next': url_for(endpoint, page=page+1, per_page=perp, **kwards)
+                'next': url_for(endpoint, page=page+1, per_page=perp, **kwargs)
                         if ressources.has_next else None,
-                'prev': url_for(endpoint, page=page-1, per_page=perp, **kwards)
+                'prev': url_for(endpoint, page=page-1, per_page=perp, **kwargs)
                         if ressources.has_prev else None,
             }
         }
 
-class Utilisateur(UserMixin, db.Model):
+class Utilisateur(PaginatedAPImixin, UserMixin, db.Model):
     @staticmethod
     def load_username(nom):
         return Utilisateur.query.filter_by(nom=nom).first_or_404()
@@ -99,13 +100,13 @@ class Utilisateur(UserMixin, db.Model):
             'about': self.about,
             'lastseen': self.lastonline,
             'pubs': [item.id for item in pubs],
-            'followers': [item.id for item in followers]
+            'partisans': [item.id for item in followers]
         }
     
     def get_jeton(self, expire=3600):
-        now - datetime.utcnow()
+        now = datetime.utcnow()
         if not self.jeton or self.jeton_expiration < now + timedelta(seconds=60): 
-            self.jeton = base64.b64encode(os.irandom(24)).decode('utf-8')
+            self.jeton = base64.b64encode(os.urandom(24)).decode('utf-8')
             self.jeton_expiration = now + timedelta(seconds=expire)
             db.session.add(self)
         return self.jeton
@@ -121,7 +122,7 @@ class Utilisateur(UserMixin, db.Model):
         return user
         
 
-class Publication(db.Model):
+class Publication(PaginatedAPImixin, db.Model):
 
     @staticmethod
     def from_id(id):
@@ -133,6 +134,14 @@ class Publication(db.Model):
     id_auteur = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+    def to_dict(self):
+        return {
+            'id' : self.id,
+            'body': self.body,
+            'creation': self.creation,
+            'id_auteur': self.id_auteur
+        }
 
 def get_modele(modele, ligne, racine):
 

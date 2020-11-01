@@ -2,7 +2,9 @@ var socket;
 var utilisateurs_tab = [];
 var publications_tab = [];
 
-var url_source = 'http://127.0.0.1:500'
+var jeton;
+
+var url_source = 'http://127.0.0.1:5000'
 
 async function socket_nouvelle_publication(data){
     console.log('socket_nouvelle_publication', data.id)
@@ -47,45 +49,40 @@ function socket_actialiser(data){
     afficher_publications('#utilisateurs', "#publications", 1, 9999)
 }
 
-function initialiser_websocket(publications_dst){
-    if(!socket || !socket.connected){
-        socket = io.connect(`http://${document.domain}:${location.port}/chat`)
-    }
-
+function initialiser_websocket(){
     socket.on('nouvelle_publication', socket_nouvelle_publication);
 
     socket.on('actualiser', socket_actialiser);
+
+    if(!socket || !socket.connected){
+        socket = io.connect(`http://${document.domain}:${location.port}/chat`)
+    }
 }
 
 async function afficher_data(utilisateurs_dst, publications_dst, page, perp){
-
-    console.log("afficher_data début")
-
-    //jQuery.ajaxSetup({async:false})
-
-    users = await charger(`${url_source}/api/publications`, publications_dst, page, perp)
-    pubs = await charger(`${url_source}/api/utilisateurs`, utilisateurs_dst, page, perp)
+    let infos = btoa('Ron:Password1')
 
     //jQuery.ajaxSetup({async:true})
-    console.log('end afficher_data')
+    jeton = await async_ajax('GET', `${url_source}/api/jeton`, 'Basic', infos).jeton
 
+    data =  {page:page, perp:perp}
+
+    //alert('Get users')
+    users = await async_ajax('GET', `${url_source}/api/utilisateurs`, 'Bearer', infos, utilisateurs_dst, data)
+    //alert('Get pubs')
+    pubs = await async_ajax('GET', `${url_source}/api/publications`, 'Bearer', infos, publications_dst, data)
+
+    //alert('load users')
     charger_utilisateurs(utilisateurs_dst, users)
+    //alert('load pubs')
     charger_publications(publications_dst, pubs)
-
-    initialiser_websocket(publications_dst)
-
 }
 
-function charger_utilisateurs(dst, users){
-
+async function charger_utilisateurs(dst, users){
     $(dst).empty()
 
-    if(!users || !users.items){
-        console.log('users', users)
-        return;
-    }
-
     users.items.forEach(u => {
+
         utilisateurs_tab[u.id] = {
             id: u.id,
             nom : u.nom,
@@ -95,33 +92,33 @@ function charger_utilisateurs(dst, users){
             partisans : u.partisans,
             publications : u.publications,
         }
+    })
 
-        html = u.partisans.map(function(pid) {
-            return `<img src='${users[pid].avatar}' width="50px"></img>`
-        }).join('')
+    utilisateurs_tab.forEach(u => {
+        html =  u.partisans && u.partisans.length > 0 ? 
+            html = u.partisans.map(pid => {
+                return `<img src='${utilisateurs_tab[pid].avatar}' width="50px"></img>`
+            }).join('')
+        : "";
+
         $(dst).append(`
         <tr id=tr{id}>
             <td id=id{id}>${u.id}</td>
             <td id=avatar${u.id}>
-                <img src="${u.avatar}" width="100px"></img>
+                <img src="${u.avatar}" width=100px/>
             </td>
-            <td id=nom${u.nom}>
+            <td id=nom${u.id}>${u.nom}
                 <td>
                     Est partisan de ${html}
                 </td>
             </td>
-        </tr>
-        `)
+        </tr>`
+        )
     })
 }
 
 function charger_publications(dst, pubs){
     $(dst).empty()
-
-    if(!pubs || !pubs.items){
-        console.log('pubs', pubs)
-        return;
-    }
 
     pubs.items.reverse().forEach(p => {
         publications_tab[p.id] = {
@@ -131,11 +128,13 @@ function charger_publications(dst, pubs){
             horodatage: p.creation
         }
 
+        auteur = utilisateurs_tab[p.id_auteur]
+
         $(dst).append(`
         <tr id=tr{id}>
             <td id=id{id}>${p.id}</td>
             <td id=avatar${p.id}>
-                <img src="${utilisateurs_tab[p.id_auteur].avatar}" width="10%"></img>
+                <img src="${auteur.avatar}" width="10%"></img>
             </td>
             <td id=corp${p.id}>${p.body}</td>
         </tr>
@@ -145,47 +144,22 @@ function charger_publications(dst, pubs){
     })
 }
 
-var jeton
+async function async_ajax(type, url, header, infos, dst, data){
+    let result;
+    result = await $.ajax({
+        type: type,
+        url: url,
+        data: data || {},
 
-async function charger(requete, dst, page, perp){
-    infos = btoa('Ron:Password1')
-
-    jeton = await ajax_jeton(infos, dst)
-
-    console.log('jeton', jeton)
-
-    return await $.ajax({
-        type: 'GET',
-        url: requete,
-
-        beforeSend: function(xhr){
-            xhr.setRequestHeader('Authorization', `Bearer ${infos}`)
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', `${header} ${infos}`);
         },
-        data: {page:page, perp:perp},
         
         error: function(){
-            $(dst).text('Erreur de chargement');
+            if(dst) $(dst).text("Erreur de chargement.") 
+            console.log(`ajax error for request ${type} ${url} \n ${header} ${infos} ${dst}`)
         }
-    })
+    });
+    if(result) console.log(`${url} | reuslt =`, result)
+    return result
 }
-
-async function ajax_jeton(infos, dst){
-    let result;
-    try{
-        result = await $.ajax({
-            type: 'GET',
-            url: `${url_source}/api/jeton`,
-
-            beforeSend: function(xhr){
-                xhr.setRequestHeader('Authorization', `Basic ${infos}`)
-            }
-        })
-    }catch(e){
-        console.log('Error in Jeton request')
-        console.log(e)
-        $(dst).text('Erreur de chargement');
-    }
-    return result;
-}
-
-console.log('loaded base.js')

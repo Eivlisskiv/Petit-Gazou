@@ -8,7 +8,7 @@ token_auth = HTTPTokenAuth()
 @basic_auth.verify_password
 def verify_password(un, pwd):
     user = Utilisateur.load_username(un)
-    if user and user.verify_password(pwd):
+    if user and user.valider_mot_de_passe(pwd):
         return user
 
 @basic_auth.error_handler
