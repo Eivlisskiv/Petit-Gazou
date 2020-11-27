@@ -2,7 +2,6 @@ from app import db
 from app.api import bp
 from app.modeles import Publication
 from app.api.auth import basic_auth, token_auth
-from flask import jsonify
 from flask import jsonify, request
 
 @bp.route('/publications/<int:id>', methods=['GET'])
@@ -23,13 +22,16 @@ def get_publications():
 
 
 @bp.route('/publications/', methods=['POST'])
+@token_auth.login_required
 def creer_pub():
     return 'create'
 
 @bp.route('/publications/', methods=['PUT'])
+@token_auth.login_required
 def put_pub():
     return 'modify'
 
 @bp.route('/publications/', methods=['DELETE'])
+@token_auth.login_required
 def delete_pub():
     return 'delete'

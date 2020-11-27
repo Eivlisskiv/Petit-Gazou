@@ -6,6 +6,10 @@ from flask_login import UserMixin
 from flask import url_for
 from app import LoginManager
 
+from PIL import Image, ImageDraw, ImageFont
+import random, base64
+from io import BytesIO
+
 @LoginManager.user_loader
 def load_utilisateur(id):
     return Utilisateur.query.get(int(id))
@@ -41,6 +45,21 @@ class Utilisateur(PaginatedAPImixin, UserMixin, db.Model):
     def load_username(nom):
         return Utilisateur.query.filter_by(nom=nom).first_or_404()
 
+    @staticmethod
+    def create_user(nom, email, pwd):
+        user = Utilisateur(nom=nom, email=email)
+        user.enregisrter_mot_de_passe(pwd)
+        user.create_pfp()
+        db.session.add(user)
+        db.session.commit()
+        return user
+    
+    @staticmethod
+    def verify_jeton(jeton):
+        user = Utilisateur.query.filter_by(jeton=jeton).first()
+        if not user or not user.jeton or user.jeton_expiration < datetime.utcnow():
+            return None
+        return user
 
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(64), index=True, unique=True)
@@ -113,14 +132,29 @@ class Utilisateur(PaginatedAPImixin, UserMixin, db.Model):
     
     def revoke_jeton(self):
         self.jeton_expiration = datetime.utcnow() - timedelta(seconds=1)
+    
+    def create_pfp(self):
+        fnt = ImageFont.truetype('./Library/Fonts/arial.ttf', 15)
+        image = Image.new('RGB', (128,128), color="Black")
+        for i in range(20):
+            coords = (random.randint(0, 128),
+             random.randint(0, 128))
 
-    @staticmethod
-    def verify_jeton(jeton):
-        user = Utilisateur.query.filter_by(jeton=jeton).first()
-        if not user or not user.jeton or user.jeton_expiration < datetime.utcnow():
-            return None
-        return user
-        
+            color = (random.randint(0, 255),
+            random.randint(0, 255), random.randint(0, 255)) 
+
+            h = random.randint(10, i + 10)
+            fnt = ImageFont.truetype('./Library/Fonts/arial.ttf', h)
+            d = ImageDraw.Draw(image)
+            d.text(coords, self.nom, font=fnt, fill=color)
+        tampon = BytesIO()
+        image.save(tampon, format="JPEG")
+        image_base = "data:image/jpg;base64," + base64.b64encode(tampon.getvalue()).decode('utf-8')
+        print('image created:')
+        print(image_base)
+        self.avatar =  image_base
+        return image_base
+
 
 class Publication(PaginatedAPImixin, db.Model):
 

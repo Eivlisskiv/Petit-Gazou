@@ -17,12 +17,12 @@ class FormRegister(FlaskForm):
     password2 = PasswordField('Retapez Mot de passe', validators=[DataRequired(), EqualTo('password')])
 
     def validate_nom(self, nom):
-        user = Utilisateur.load_username(nom=nom.data).first()
+        user = Utilisateur.load_username(nom=nom.data)
         if user is not None:
             raise ValidationError('Ce nom existe déjà...')
 
     def validate_email(self, email):
-        user = Utilisateur.load_username(email=email.data).first()
+        user = Utilisateur.query.filter_by(email=email.data).first_or_404()
         if user is not None:
             raise ValidationError('Ce courriel existe déjà...')
 

@@ -7,56 +7,55 @@ var jeton;
 var url_source = 'http://127.0.0.1:5000'
 
 async function socket_nouvelle_publication(data){
-    console.log('socket_nouvelle_publication', data.id)
 
-    dst = dst || element_dst
-
-    infos = btoa('Ron:Password1')
-    jeton = await ajax_jeton(infos, dst)
-    console.log('jeton', jeton)
-    let response;
     try{
-        response = await $.ajax({
-            type: 'GET',
-            url: `${url_source}//api/publications/${data.id}`,
+        console.log('socket_nouvelle_publication', data.id)
 
-            beforeSend: function(xhr){
-                xhr.setRequestHeader('Authorization', `Bearer ${infos}`)
-            }
-        })
+        infos = btoa('Ron:Password1')
+        jeton = await async_ajax('GET', `${url_source}/api/jeton`, 'Basic', infos).jeton
+
+        console.log('jeton', jeton)
+        publications_dst = "#publications"
+        let response = await async_ajax('GET', `${url_source}//api/publications/${data.id}`, 'Bearer', infos, publications_dst)
+
+        console.log('response.body', response.body)
+
+        if(!publications_tab[response.id]){
+            auteur = utilisateurs_tab[response.id_auteur]
+            $(publication_dst).prepend(`
+            <tr id=tr{id}>
+                <td id=id{id}>${response.id}</td>
+                <td id=avatar>
+                    <img src="${auteur.avatar}">${auteur.nom}</img>
+                </td>
+            </tr>
+            `)
+        }
+
     }catch(e){
-        $(dst).text('Erreur de chargement');
-        return
-    }
-
-    console.log('response.body', response.body)
-
-    if(!publications_tab[response.id]){
-        auteur = utilisateurs_tab[response.id_auteur]
-        $(publication_dst).prepend(`
-        <tr id=tr{id}>
-            <td id=id{id}>${response.id}</td>
-            <td id=avatar>
-                <img src="${auteur.avatar}">${auteur.nom}</img>
-            </td>
-        </tr>
-        `)
+        console.log(e)
     }
 }
 
 function socket_actialiser(data){
-    console.log(data.bidon)
-    afficher_publications('#utilisateurs', "#publications", 1, 9999)
+
+    try{
+        console.log(data.bidon)
+        afficher_publications('#utilisateurs', "#publications", 1, 9999)
+    }catch(e){
+        console.log(e)
+    }
 }
 
 function initialiser_websocket(){
-    socket.on('nouvelle_publication', socket_nouvelle_publication);
-
-    socket.on('actualiser', socket_actialiser);
 
     if(!socket || !socket.connected){
         socket = io.connect(`http://${document.domain}:${location.port}/chat`)
     }
+
+    socket.on('nouvelle_publication', socket_nouvelle_publication);
+
+    socket.on('actualiser', socket_actialiser);
 }
 
 async function afficher_data(utilisateurs_dst, publications_dst, page, perp){
@@ -70,7 +69,7 @@ async function afficher_data(utilisateurs_dst, publications_dst, page, perp){
     //alert('Get users')
     users = await async_ajax('GET', `${url_source}/api/utilisateurs`, 'Bearer', infos, utilisateurs_dst, data)
     //alert('Get pubs')
-    pubs = await async_ajax('GET', `${url_source}/api/publications`, 'Bearer', infos, publications_dst, data)
+    pubs = await async_ajax('GET', `${url_source}/api/publications`, 'Bearer', infos, publications_dst)
 
     //alert('load users')
     charger_utilisateurs(utilisateurs_dst, users)

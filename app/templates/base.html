@@ -7,12 +7,17 @@
 {% endblock %}
 {% block scripts %}
     {{super()}}
-    <script src="//dfmjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity=""></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" 
+        integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" 
+        crossorigin="anonymous">
+    </script>
+
     <script type="text/javascript" src="{{url_for('static', filename='base.js')}}"></script>
     <script>
         function afficher_data1(){
             afficher_data('#utilisateurs', '#publications', 1, 999999)
-            //initialiser_websocket()
+            initialiser_websocket()
         }
 
     </script>
