@@ -1,10 +1,13 @@
-from app import app, db, modeles
+from app import app, db, modeles, socketio
 from app.modeles import Utilisateur, Publication
 import os, csv
 
 @app.shell_context_processor
 def make_shell_context():
     return {'db':db, 'U': Utilisateur, 'P':Publication }
+
+if __name__ == "__main__":
+    socketio.run(app)
 
 @app.before_first_request
 def initialization():

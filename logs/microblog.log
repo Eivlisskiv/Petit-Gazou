@@ -71,3 +71,4 @@ sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - c
 2020-10-05 17:12:08,640 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
 2020-10-05 17:12:59,920 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
 2020-10-05 17:13:33,270 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:47]
+2020-11-02 16:39:51,944 INFO: Démarrage de Petit Gazou [in /home/etudiant/python/petits_gazou/app/__init__.py:55]

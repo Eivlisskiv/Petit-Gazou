@@ -1,19 +1,23 @@
-from app import app, db, modeles
+from app import app
+from app import db, modeles, socketio
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app.forms import FormSession, FormRegister, FormEditProfile, PublicationForm
 from app.modeles import Utilisateur, Publication
 from flask_login import current_user, login_user, logout_user, login_required
-from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
 from datetime import datetime
-import random, base64
+
 
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
         current_user.lastonline = datetime.utcnow()
         db.session.commit()
+
+@app.route('/websocket')
+def websocket():
+    print('Websocket route')
+    return render_template('websocket.html')
 
 def getPages(list, url):
     return (
@@ -34,6 +38,7 @@ def index():
         pub = Publication(body=form.publication.data, auteur=current_user)
         db.session.add(pub)
         db.session.commit()
+        socketio.emit('nouvelle_publication', { 'id' : pub.id }, namespace='/chat')
         flash('Publication envoyée!')
 
     pubs = current_user.getPartisansPubs().paginate(
@@ -48,35 +53,21 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    print(request.method)
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+    print('not logged')
     formulaire = FormRegister()
-    if formulaire.is_submitted(): 
-        print("submitted")
-        if formulaire.validate():
-            flash('Validation complete!')
-            user = Utilisateur(nom=formulaire.nom.data, email=formulaire.email.data)
-            user.enregisrter_mot_de_passe(formulaire.password.data)
-            fnt = ImageFont.truetype('./Library/Fonts/arial.ttf', 15)
-            image = Image.new('RGB', (128,128), color="Black")
-            for i in range(20):
-                coords = (random.randint(0, 128), random.randint(0, 128))
-                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) 
-                h = random.randint(10, i + 10)
-                fnt = ImageFont.truetype('./Library/Fonts/arial.ttf', h)
-                d = ImageDraw.Draw(image)
-                d.text(coords, user.nom, font=fnt, fill=color)
-            tampon = BytesIO()
-            image.save(tampon, format="JPEG")
-            image_base = "data:image/jpg;base64," + base64.b64encode(tampon.getvalue()).decode('utf-8')
-            print(image_base)
-            user.avatar =  image_base
-            db.session.add(user)
-            db.session.commit()
-            flash('Félicitations, vous êtes maintenant enregistré!')
-            return redirect(url_for('login'))  
-    flash('Inscription en cours...')
-    return render_template('register.html', title="Enregistrement", form=formulaire)
+    if formulaire.validate_on_submit(): 
+        print('validated')
+        flash('Validation complete!')
+        Utilisateur.create_user(formulaire.nom.data, 
+        formulaire.email.data, formulaire.password.data)
+        flash('Félicitations, vous êtes maintenant enregistré!')
+        return redirect(url_for('login'))  
+    #flash('Inscription en cours...')
+    if request.method == "GET":
+        return render_template('register.html', title="Enregistrement", form=formulaire)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -104,13 +95,13 @@ def logout():
 @app.route('/profile/<nom>')
 @login_required
 def profile(nom):
-    user = modeles.load_username(nom)
+    user = Utilisateur.load_username(nom)
     return render_template('profile.html', user=user, pubs=user.publications.all())
 
 @app.route('/suivre/<nom>', methods=['GET'])
 @login_required
 def suivre(nom):
-    user = modeles.load_username(nom)
+    user = Utilisateur.load_username(nom)
     if user is None:
         return redirect(url_for('index'))
     if user != current_user:
@@ -121,6 +112,7 @@ def suivre(nom):
             current_user.userUnsub(user)
             flash('Vous ne suivez plus ' + nom)
         db.session.commit()
+        socketio.emit('actualiser', {'bison':'vide'}, namespace='/chat')
     
     return redirect(url_for('profile', nom=nom))
         
